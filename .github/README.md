@@ -1,10 +1,10 @@
 Allows you to change the camera recoil on guns, or remove it entirely.
 
 Before:
-![Before Mod](images/Before.gif)
+![Before Mod](https://github.com/refringe/CustomCameraRecoil/blob/main/images/Before.gif?raw=true)
 
 After:
-![After Mod](images/After.gif)
+![After Mod](https://github.com/refringe/CustomCameraRecoil/blob/main/images/After.gif?raw=true)
 
 To Install:
 
