@@ -1,10 +1,10 @@
 Allows you to change the camera recoil on guns, or remove it entirely.
 
 Before:
-![Before Mod](https://downloadthisfor.me/spt-aki-mods/CustomCameraRecoil/Before.gif)
+![Before Mod](images/Before.gif)
 
 After:
-![After Mod](https://downloadthisfor.me/spt-aki-mods/CustomCameraRecoil/After.gif)
+![After Mod](images/After.gif)
 
 To Install:
 
