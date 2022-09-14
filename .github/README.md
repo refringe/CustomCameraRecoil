@@ -1,3 +1,6 @@
+This is a mod for Single Player Tarkov.  
+https://www.sp-tarkov.com
+
 Allows you to change the camera recoil on guns, or remove it entirely.
 
 **Before:**  
