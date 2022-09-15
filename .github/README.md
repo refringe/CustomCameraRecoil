@@ -15,4 +15,6 @@ To Install:
  - Open the `CustomCameraRecoil/config/config.json` file to adjust camera recoil options.
  - Leave a review and let me know what you think.
 
+If you experience any problems, please [submit a detailed bug report](https://github.com/refringe/CustomCameraRecoil/issues).
+
 Enjoy.
