@@ -6,7 +6,7 @@
     "debug": false,
 
     "_comment_3": "Selects the method to adjust camera recoil. ['precise'/'percent']",
-    "camera_recoil_method": "percent",
+    "camera_recoil_method": "precise",
 
     "_comment_4": "The specific camera recoil value to set on all guns. [float]",
     "_comment_5": "Only used if camera_recoil_method is set to 'precise'.",
