@@ -10,7 +10,7 @@ class CustomCameraRecoil implements IPostDBLoadModAsync
     public async postDBLoadAsync(container: DependencyContainer): Promise<void>
     {
         // Get the configuration options.
-        const config = require("../config/config.json");
+        const config = await import("../config/config.json");
 
         // Get the logger from the server container.
         const logger = container.resolve<ILogger>("WinstonLogger");
@@ -19,7 +19,7 @@ class CustomCameraRecoil implements IPostDBLoadModAsync
         const enabled:boolean = config.mod_enabled;
         if (!enabled)
         {
-            logger.info("CustomCameraRecoil is disabled in the config file.");
+            logger.logWithColor("CustomCameraRecoil is disabled in the config file.", LogTextColor.RED, LogBackgroundColor.DEFAULT);
             return;
         }
 
