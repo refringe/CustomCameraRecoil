@@ -1,42 +1,50 @@
-import { IPostDBLoadModAsync } from "@spt-aki/models/external/IPostDBLoadModAsync";
-import { LogBackgroundColor } from "@spt-aki/models/spt/logging/LogBackgroundColor";
-import { LogTextColor } from "@spt-aki/models/spt/logging/LogTextColor";
-import { ILogger } from "@spt-aki/models/spt/utils/ILogger";
-import { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
+import type { ITemplateItem } from "@spt-aki/models/eft/common/tables/ITemplateItem";
+import type { IPostDBLoadMod } from "@spt-aki/models/external/IPostDBLoadMod";
+import type { ILogger } from "@spt-aki/models/spt/utils/ILogger";
+import type { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
 import { DependencyContainer } from "tsyringe";
 
-class CustomCameraRecoil implements IPostDBLoadModAsync
+class CustomCameraRecoil implements IPostDBLoadMod
 {
-    public async postDBLoadAsync(container: DependencyContainer): Promise<void>
+    private config:any;
+    private container:DependencyContainer;
+    private logger:ILogger;
+    private debug = false;
+
+    public postDBLoad(container: DependencyContainer):void
     {
-        // Get the configuration options.
-        const config = await import("../config/config.json");
+        require("json5/lib/register");
+        this.config = require("../config/config.json5");
+
+        this.container = container;
 
         // Get the logger from the server container.
-        const logger = container.resolve<ILogger>("WinstonLogger");
+        this.logger = this.container.resolve<ILogger>("WinstonLogger");
 
         // Check to see if the mod is enabled.
-        const enabled:boolean = config.mod_enabled;
-        if (!enabled)
+        if (!this.config.enabled)
         {
-            logger.logWithColor("CustomCameraRecoil is disabled in the config file.", LogTextColor.RED, LogBackgroundColor.DEFAULT);
+            this.logger.log("CustomCameraRecoil is disabled in the config file.", "red");
             return;
         }
 
-        // Find out if we're logging everything.
-        const debug:boolean = config.debug;
+        // We loud?
+        this.debug = this.config.debug;
 
-        // Get database from server.
-        const databaseServer = container.resolve<DatabaseServer>("DatabaseServer");
+        // Engage!
+        this.adjustCameraRecoil();
+    }
 
-        // Get in-memory json found in /assets/database
-        const tables = databaseServer.getTables();
-
-        // Get a list of all items in the database.
-        const items = tables.templates.items
+    /**
+     * Generates custom raid times based on a number of configuration values.
+     */
+    private adjustCameraRecoil():void
+    {
+        // Get the database tables.
+        const items:Record<string, ITemplateItem> = this.container.resolve<DatabaseServer>("DatabaseServer").getTables().templates.items;
 
         // Which method are we using to modify the recoil?
-        const method:string = config.camera_recoil_method;
+        const method:string = this.config.camera_recoil_method;
 
         // Count for the logs.
         let changeCount = 0;
@@ -53,16 +61,14 @@ class CustomCameraRecoil implements IPostDBLoadModAsync
                 let newRecoil:number;
 
                 if (method === "precise")
-                {
-                    newRecoil = config.precise_camera_recoil;
-                }
+                    newRecoil = this.config.precise_camera_recoil;
                 else if (method === "percent")
                 {
                     // Calculate the relative percentage of the current camera recoil value.
                     // Example: 50% (increase) to 0.5 = 0.75
                     //         -50% (decrease) to 0.5 = 0.25
-                    const increase = config.percent_camera_recoil >= 0;
-                    const percentage = increase ? config.percent_camera_recoil : config.percent_camera_recoil * -1;
+                    const increase = this.config.percent_camera_recoil >= 0;
+                    const percentage = increase ? this.config.percent_camera_recoil : this.config.percent_camera_recoil * -1;
                     newRecoil = (percentage / 100) * items[item]._props.CameraRecoil;
                     newRecoil = increase ? (items[item]._props.CameraRecoil + newRecoil) : (items[item]._props.CameraRecoil - newRecoil);
                     
@@ -70,27 +76,23 @@ class CustomCameraRecoil implements IPostDBLoadModAsync
                     newRecoil = Math.round(newRecoil * 10000) / 10000;
                 }
 
-                if (debug)
-                {
-                    logger.info(`CustomCameraRecoil: Weapon '${items[item]._props.ShortName}' of class '${items[item]._props.weapClass}' has had camera recoil modified from ${items[item]._props.CameraRecoil} to ${newRecoil}.`);
-                }
+                if (this.debug)
+                    this.logger.log(`CustomCameraRecoil: Weapon '${items[item]._name}' of class '${items[item]._props.weapClass}' has had camera recoil modified from ${items[item]._props.CameraRecoil} to ${newRecoil}.`, "gray");
 
                 // No negative camera recoil values.
                 items[item]._props.CameraRecoil = newRecoil;
-                if (items[item]._props.CameraRecoil <= 0)
+                if (items[item]._props.CameraRecoil < 0)
                 {
                     items[item]._props.CameraRecoil = 0.0;
-                    if (debug)
-                    {
-                        logger.info(`CustomCameraRecoil: Weapon '${items[item]._props.ShortName}' of class '${items[item]._props.weapClass}' can not have negative camera recoil. Setting to 0.`);
-                    }
+                    if (this.debug)
+                        this.logger.log(`CustomCameraRecoil: Weapon '${items[item]._name}' of class '${items[item]._props.weapClass}' can not have negative camera recoil. Setting to 0.`, "gray");
                 }
 
                 changeCount++;
             }
         }
 
-        logger.logWithColor(`CustomCameraRecoil: Adjusted the camera recoil for ${changeCount} weapons.`, LogTextColor.CYAN, LogBackgroundColor.DEFAULT);
+        this.logger.log(`CustomCameraRecoil: Adjusted the camera recoil for ${changeCount} weapons.`, "cyan");
     }
 }
 
