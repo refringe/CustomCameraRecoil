@@ -11,7 +11,7 @@ class CustomCameraRecoil implements IPostDBLoadMod
     private logger:ILogger;
     private debug = false;
 
-    public postDBLoad(container: DependencyContainer):void
+    public postDBLoad(container:DependencyContainer): void
     {
         require("json5/lib/register");
         this.config = require("../config/config.json5");
