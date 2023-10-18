@@ -1,21 +1,30 @@
 {
-    // Enables the use of the mod.
-    "enabled": true,
+    // General settings for the mod
+    general: {
+        // Enables the use of the mod
+        enabled: true,
 
-    // Verbose logging.
-    "debug": false,
+        // Enables verbose logging
+        // Logs the default and altered camera recoil values for each weapon.
+        debug: false,
+    },
 
-    // Selects the method to adjust camera recoil. ["precise" or "percent"]
-    "camera_recoil_method": "precise",
+    recoil: {
+        // Selects the method to adjust camera recoil. ["precise" or "percent"]
+        "method": "percent",
 
-    // The specific camera recoil value to set on all guns. [float]
-    // Only used if camera_recoil_method is set to "precise".
-    // Keep the value between 0.0 and 1.0.
-    // The default is 0.0, which disables camera recoil entirely.
-    "precise_camera_recoil": 0.0,
+        // The specific camera recoil value to set on all guns. [float]
+        // Only used if the above method option is set to "precise".
+        // Keep the value between 0.0 and 1.0.
+        //
+        // Example: A value of 0.0 will disable camera recoil entirely.
+        "precise": 0.0,
 
-    // The percentage the camera recoil value will be adjusted by. [integer]
-    // Only used if camera_recoil_override is set to "percent".
-    // Example: -50% (decrease) to 0.5 = 0.25, which would half the amount of camera recoil.
-    "percent_camera_recoil": -50
+        // The percentage the camera recoil value will be adjusted by. [integer]
+        // Only used if the above "method" option is set to "percent".
+        // Keep the value between -99 and 100.
+        //
+        // Example: A value of -50 will decrease camera recoil by 50%.
+        "percent": -50
+    },
 }
