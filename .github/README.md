@@ -1,4 +1,4 @@
-This is a mod for Single Player Tarkov.
+This is a mod for Single Player Tarkov.  
 https://www.sp-tarkov.com
 
 When you fire a weapon, you might notice that not only does the gun move but the whole screen kind of shakes and jumps. This shaking and jumping of the screen is what's called "camera recoil". It's like the game is trying to simulate how when you fire a real gun, the force makes your hands and your view shake a bit. This makes the game feel more real and challenging, because you have to control the weapon not just by aiming, but also by handling how it "kicks" and moves your view around when you shoot.
