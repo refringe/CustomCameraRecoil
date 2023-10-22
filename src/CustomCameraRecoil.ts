@@ -12,8 +12,8 @@ export class CustomCameraRecoil implements IPostDBLoadMod, IPreAkiLoadMod {
     public static config: Configuration | null = null;
 
     /**
-     * Handle loading the configuration file and registering our custom MatchCallbacks class.
-     * Runs before the database is loaded.
+     * Handles the initial mod set-up, registering the container, logger, and configuration file as a static that can be
+     * easily accessed throughout the mod.
      */
     public preAkiLoad(container: DependencyContainer): void {
         CustomCameraRecoil.container = container;
