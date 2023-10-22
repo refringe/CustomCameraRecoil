@@ -24,6 +24,8 @@
 !/node_modules/punycode
 !/node_modules/json5
 /package-lock.json
+/pnpm-lock.yaml
 /postInstall.mjs
 /tsconfig.json
 /types
+/yarn.lock
