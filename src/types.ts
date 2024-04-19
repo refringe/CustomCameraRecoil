@@ -4,15 +4,14 @@ export interface Configuration {
     recoil: RecoilSettings;
 }
 
-// The configuration file structure for the "general" section.
+// The configuration structure for the "general" section.
 export interface GeneralSettings {
     enabled: boolean;
     debug: boolean;
 }
 
-// The configuration file structure for the "recoil" section.
+// The configuration structure for the "recoil" section.
 export interface RecoilSettings {
-    method: "precise" | "percent";
-    precise: number;
+    remove: boolean;
     percent: number;
 }

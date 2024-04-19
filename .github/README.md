@@ -15,10 +15,10 @@ This modification allows you to change the camera recoil on guns by a relative p
 
 # To Install:
 
- - Decompress the contents of the download into the `./user/mods/` directory.
- - Open the `CustomCameraRecoil/config/config.json5` file to adjust camera recoil options.
-    - The configuration file is in **JSON5** format. The file extension is not a mistake. **_Do not rename it!_**
- - Leave a review and let me know what you think.
+-   Decompress the contents of the download into the `./user/mods/` directory.
+-   Open the `CustomCameraRecoil/config/config.json5` file to adjust camera recoil options.
+    -   The configuration file is in **JSON5** format. The file extension is not a mistake. **_Do not rename it!_**
+-   Leave a review and let me know what you think.
 
 If you experience any problems, please [submit a detailed bug report](https://github.com/refringe/CustomCameraRecoil/issues).
 

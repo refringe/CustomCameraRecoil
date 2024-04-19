@@ -19,23 +19,66 @@ export class CameraRecoilAdjuster {
      */
     public adjustCameraRecoil(): void {
         const items = this.getDatabaseItems();
-        const method = CustomCameraRecoil.config.recoil.method;
         let changeCount = 0;
 
         // Loop through all items to adjust their camera recoil.
         for (const item in items) {
-            if (this.isRecoilAdjustable(items[item])) {
-                const newRecoil = this.calculateNewRecoil(items[item], method);
-                this.logRecoilChange(items[item], newRecoil);
-                this.updateItemRecoil(items[item], newRecoil);
-                changeCount++;
+            const currentItem = items[item];
+
+            if (!this.isRecoilAdjustable(currentItem)) {
+                continue;
             }
+
+            this.updateAndLogRecoil(currentItem, "CameraSnap", currentItem._props.CameraSnap);
+            this.updateAndLogRecoil(
+                currentItem,
+                "CameraToWeaponAngleSpeedRange",
+                currentItem._props.CameraToWeaponAngleSpeedRange
+            );
+            this.updateAndLogRecoil(currentItem, "CameraToWeaponAngleStep", currentItem._props.CameraToWeaponAngleStep);
+            this.updateAndLogRecoil(currentItem, "RecoilCamera", currentItem._props.RecoilCamera);
+
+            changeCount++;
         }
 
         CustomCameraRecoil.logger.log(
             `CustomCameraRecoil: Adjusted the camera recoil for ${changeCount} weapons.`,
             "cyan"
         );
+    }
+
+    /**
+     * Updates and logs a single recoil property.
+     */
+    private updateAndLogRecoil(
+        item: ITemplateItem,
+        propName: string,
+        value: number | { x: number; y: number; z: number }
+    ): void {
+        if (typeof value === "number") {
+            const oldValue = item._props[propName];
+            item._props[propName] = this.calculateNewRecoil(value);
+            this.logRecoilChange(item, propName, oldValue, item._props[propName]);
+        } else {
+            for (const axis of Object.keys(value)) {
+                const axisPropName = `${propName} ${axis.toUpperCase()}`;
+                const oldValue = item._props[propName][axis];
+                item._props[propName][axis] = this.calculateNewRecoil(value[axis]);
+                this.logRecoilChange(item, axisPropName, oldValue, item._props[propName][axis]);
+            }
+        }
+    }
+
+    /**
+     * Logs the change in recoil property for debugging purposes.
+     */
+    private logRecoilChange(item: ITemplateItem, propName: string, oldValue: number, newValue: number): void {
+        if (CustomCameraRecoil.config.general.debug) {
+            CustomCameraRecoil.logger.log(
+                `CustomCameraRecoil: Weapon '${item._name}' of class '${item._props.weapClass}' property '${propName}' has been modified from ${oldValue} to ${newValue}.`,
+                "gray"
+            );
+        }
     }
 
     /**
@@ -57,7 +100,10 @@ export class CameraRecoilAdjuster {
         // Using `hasOwnProperty` to ensure that the property exists directly on the object.
         return (
             Object.prototype.hasOwnProperty.call(item._props, "ShortName") &&
-            Object.prototype.hasOwnProperty.call(item._props, "CameraRecoil") &&
+            Object.prototype.hasOwnProperty.call(item._props, "CameraSnap") &&
+            Object.prototype.hasOwnProperty.call(item._props, "CameraToWeaponAngleSpeedRange") &&
+            Object.prototype.hasOwnProperty.call(item._props, "CameraToWeaponAngleStep") &&
+            Object.prototype.hasOwnProperty.call(item._props, "RecoilCamera") &&
             Object.prototype.hasOwnProperty.call(item._props, "weapClass")
         );
     }
@@ -65,63 +111,37 @@ export class CameraRecoilAdjuster {
     /**
      * Calculates the new recoil value for an item.
      *
-     * @param {ITemplateItem} item - The item to adjust.
-     * @param {string} method - The method to use for adjustment ("precise" or "percent").
+     * @param {number} currentRecoilValue - The current recoil value.
      * @returns {number} The calculated new recoil value.
      */
-    private calculateNewRecoil(item: ITemplateItem, method: string): number {
-        // If method is "precise", directly return the precise value from the config.
-        if (method === "precise") {
-            return CustomCameraRecoil.config.recoil.precise;
+    private calculateNewRecoil(currentRecoilValue: number): number {
+        // If method is to remove then return 0.
+        if (CustomCameraRecoil.config.recoil.remove === true) {
+            return 0;
         }
 
-        // Determine if the recoil should be increased or decreased.
-        const increase = CustomCameraRecoil.config.recoil.percent >= 0;
-
-        // Use Math.abs to get the absolute value of the percentage.
-        const percentage = Math.abs(CustomCameraRecoil.config.recoil.percent);
-
-        // Calculate the new recoil based on the percentage.
-        let newRecoil = (percentage / 100) * item._props.CameraRecoil;
-
-        // Conditionally adjust the recoil based on whether it should increase or decrease.
-        newRecoil = increase ? item._props.CameraRecoil + newRecoil : item._props.CameraRecoil - newRecoil;
-
-        // Round to 4 decimal places.
-        return Math.round(newRecoil * 10000) / 10000;
+        return this.calculateRelativePercentage(CustomCameraRecoil.config.recoil.percent, currentRecoilValue);
     }
 
     /**
-     * Logs the change in recoil for debugging purposes.
+     * Adjust a number by a relative percentage.
+     * Example: 50 = 50% increase (0.5 changed to 0.75)
+     *         -50 = 50% decrease (0.5 changed to 0.25)
      *
-     * @param {ITemplateItem} item - The item whose recoil was adjusted.
-     * @param {number} newRecoil - The new recoil value.
+     * @param percentage The relative percentage to adjust value by.
+     * @param value The number to adjust.
+     * @returns number
      */
-    private logRecoilChange(item: ITemplateItem, newRecoil: number): void {
-        if (CustomCameraRecoil.config.general.debug) {
-            CustomCameraRecoil.logger.log(
-                `CustomCameraRecoil: Weapon '${item._name}' of class '${item._props.weapClass}' has had camera recoil modified from ${item._props.CameraRecoil} to ${newRecoil}.`,
-                "gray"
-            );
-        }
-    }
+    private calculateRelativePercentage(percentage: number, value: number): number {
+        const increase = percentage >= 0;
+        const differencePercentage = increase ? percentage : percentage * -1;
+        const difference = (differencePercentage / 100) * value;
+        let adjustedValue = increase ? value + difference : value - difference;
 
-    /**
-     * Updates the recoil value of an item.
-     *
-     * @param {ITemplateItem} item - The item to update.
-     * @param {number} newRecoil - The new recoil value.
-     */
-    private updateItemRecoil(item: ITemplateItem, newRecoil: number): void {
-        // Prevent negative recoil values by setting them to zero.
-        item._props.CameraRecoil = newRecoil < 0 ? 0 : newRecoil;
+        // Round the new value to max 4 decimal places.
+        adjustedValue = Number((adjustedValue * 10000).toFixed(0)) / 10000;
 
-        // If the recoil is negative, log a debug message.
-        if (newRecoil < 0 && CustomCameraRecoil.config.general.debug) {
-            CustomCameraRecoil.logger.log(
-                `CustomCameraRecoil: Weapon '${item._name}' of class '${item._props.weapClass}' can not have negative camera recoil. Setting to 0.`,
-                "gray"
-            );
-        }
+        // If the value is less than 0, return 0.
+        return adjustedValue > 0 ? adjustedValue : 0;
     }
 }

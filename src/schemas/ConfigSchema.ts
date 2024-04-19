@@ -23,16 +23,9 @@ export class ConfigSchema {
             recoil: {
                 type: "object",
                 properties: {
-                    method: {
-                        type: "string",
-                        enum: ["precise", "percent"],
-                        description: "Selects the method to adjust camera recoil",
-                    },
-                    precise: {
-                        type: "number",
-                        minimum: 0.0,
-                        maximum: 1.0,
-                        description: "The specific camera recoil value to set on all guns.",
+                    remove: {
+                        type: "boolean",
+                        description: "Removes all camera recoil from the game",
                     },
                     percent: {
                         type: "integer",
@@ -41,7 +34,7 @@ export class ConfigSchema {
                         description: "The percentage the camera recoil value will be adjusted by.",
                     },
                 },
-                required: ["method", "precise", "percent"],
+                required: ["remove", "percent"],
             },
         },
         required: ["general", "recoil"],
