@@ -1,17 +1,25 @@
-import type { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
-import { CustomCameraRecoil } from "../CustomCameraRecoil";
-import type { ITemplateItem } from "@spt-aki/models/eft/common/tables/ITemplateItem";
+import type { DatabaseServer } from "@spt/servers/DatabaseServer";
+import type { ITemplateItem } from "@spt/models/eft/common/tables/ITemplateItem";
+import type { ILogger } from "@spt/models/spt/utils/ILogger";
+import { DependencyContainer } from "tsyringe";
+import { Configuration } from "../types";
 
 /**
  * The `CameraRecoilAdjuster` class is responsible for orchestrating adjustments to weapons camera recoil
  * according to a predefined configuration.
  */
 export class CameraRecoilAdjuster {
+    private container: DependencyContainer;
+    private logger: ILogger;
+    private config: Configuration;
+
     /**
-     * Constructor initializes the camera recoil adjustment process.
+     * Constructs a new instance of the `CameraRecoilAdjuster` class.
      */
-    constructor() {
-        this.adjustCameraRecoil();
+    constructor(container: DependencyContainer, config: Configuration) {
+        this.container = container;
+        this.logger = this.container.resolve<ILogger>("WinstonLogger");
+        this.config = config;
     }
 
     /**
@@ -41,10 +49,7 @@ export class CameraRecoilAdjuster {
             changeCount++;
         }
 
-        CustomCameraRecoil.logger.log(
-            `CustomCameraRecoil: Adjusted the camera recoil for ${changeCount} weapons.`,
-            "cyan"
-        );
+        this.logger.log(`CustomCameraRecoil: Adjusted the camera recoil for ${changeCount} weapons.`, "cyan");
     }
 
     /**
@@ -73,8 +78,8 @@ export class CameraRecoilAdjuster {
      * Logs the change in recoil property for debugging purposes.
      */
     private logRecoilChange(item: ITemplateItem, propName: string, oldValue: number, newValue: number): void {
-        if (CustomCameraRecoil.config.general.debug) {
-            CustomCameraRecoil.logger.log(
+        if (this.config.general.debug) {
+            this.logger.log(
                 `CustomCameraRecoil: Weapon '${item._name}' of class '${item._props.weapClass}' property '${propName}' has been modified from ${oldValue} to ${newValue}.`,
                 "gray"
             );
@@ -87,7 +92,7 @@ export class CameraRecoilAdjuster {
      * @returns {Record<string, ITemplateItem>} A record containing items.
      */
     private getDatabaseItems(): Record<string, ITemplateItem> {
-        return CustomCameraRecoil.container.resolve<DatabaseServer>("DatabaseServer").getTables().templates.items;
+        return this.container.resolve<DatabaseServer>("DatabaseServer").getTables().templates.items;
     }
 
     /**
@@ -116,11 +121,11 @@ export class CameraRecoilAdjuster {
      */
     private calculateNewRecoil(currentRecoilValue: number): number {
         // If method is to remove then return 0.
-        if (CustomCameraRecoil.config.recoil.remove === true) {
+        if (this.config.recoil.remove === true) {
             return 0;
         }
 
-        return this.calculateRelativePercentage(CustomCameraRecoil.config.recoil.percent, currentRecoilValue);
+        return this.calculateRelativePercentage(this.config.recoil.percent, currentRecoilValue);
     }
 
     /**

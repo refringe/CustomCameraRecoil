@@ -12,13 +12,13 @@
     recoil: {
         // Setting this to true will remove camera recoil for all weapons.
         // If set to false, the recoil will be adjusted by the "percent" value below.
-        "remove": false,
+        remove: false,
 
         // The percentage the camera recoil value will be adjusted by. [integer]
         // Only used if the above "remove" option is set to false.
         // Keep the value between -99 and 100.
         //
         // Example: A value of -50 will decrease camera recoil by 50%.
-        "percent": -50
+        percent: -50,
     },
 }
